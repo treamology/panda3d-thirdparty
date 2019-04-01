@@ -5,9 +5,15 @@ cmake_minimum_required(VERSION 2.8.3)
 
 # Set defaults.  Must be before project().
 if(APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "x86_64;i386" CACHE STRING "")
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6" CACHE STRING "")
-  set(CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}.sdk/ CACHE PATH "")
+  # For some reason CMake's IOS variable doesn't work?
+  if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(CMAKE_OSX_ARCHITECTURES "armv7;armv7s;arm64" CACHE STRING "")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "8.0" CACHE STRING "")
+  else()
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;i386" CACHE STRING "")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6" CACHE STRING "")
+    set(CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}.sdk/ CACHE PATH "")
+  endif()
 endif()
 
 project(panda3d-thirdparty)
@@ -73,6 +79,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
   else()
     set(THIRDPARTY_DIR ${CMAKE_SOURCE_DIR}/freebsd-libs-a)
   endif()
+
+elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+  string(REPLACE ";" "-" ios_archs "${CMAKE_OSX_ARCHITECTURES}")
+  set(THIRDPARTY_DIR ${CMAKE_SOURCE_DIR}/ios-libs-${ios_archs})
 
 else()
   message(FATAL_ERROR "Unknown platform.")
